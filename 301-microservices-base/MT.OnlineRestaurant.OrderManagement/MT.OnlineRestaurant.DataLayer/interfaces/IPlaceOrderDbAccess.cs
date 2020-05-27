@@ -18,5 +18,6 @@ namespace MT.OnlineRestaurant.DataLayer.interfaces
         /// <param name="customerId"></param>
         /// <returns></returns>
         IQueryable<TblFoodOrder> GetReports(int customerId);
+        int PlaceOrderMappingTable(List<TblFoodOrderMapping> tblFoodOrderMappings);
     }
 }

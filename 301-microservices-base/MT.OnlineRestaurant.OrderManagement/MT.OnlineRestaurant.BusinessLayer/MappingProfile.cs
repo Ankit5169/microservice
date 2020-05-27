@@ -29,7 +29,17 @@ namespace MT.OnlineRestaurant.BusinessLayer
 
             CreateMap<ICollection<OrderMenus>, ICollection<TblFoodOrderMapping>>();
 
-            
+            CreateMap<AddToCartEntity, TblFoodCart>()
+                .ForMember(dest => dest.TblRestaurantId, opt => opt.MapFrom(src => src.RestaurantId))
+                .ForMember(dest => dest.TblCustomerId, opt => opt.MapFrom(src => src.CustomerId))
+                .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.OrderMenuDetails.Sum(m => m.Price)))
+                .ForMember(dest => dest.RecordTimeStamp, opt => opt.MapFrom(src => DateTime.Now));
+
+            CreateMap<OrderMenus, TblFoodCartMapping>()
+                .ForMember(dest => dest.TblMenuId, opt => opt.MapFrom(src => src.MenuId));
+
+            CreateMap<ICollection<OrderMenus>, ICollection<TblFoodCartMapping>>();
+
         }
     }
 }

@@ -24,6 +24,12 @@ namespace MT.OnlineRestaurant.DataLayer
             _context.SaveChanges();
             return OrderedFoodDetails.Id;
         }
+        public int PlaceOrderMappingTable(List<TblFoodOrderMapping> tblFoodOrderMapping)
+        {
+            _context.TblFoodOrderMapping.AddRange(tblFoodOrderMapping);
+            _context.SaveChanges();
+            return tblFoodOrderMapping.Count;
+        }
 
         public int CancelOrder(int orderId)
         {
@@ -46,5 +52,6 @@ namespace MT.OnlineRestaurant.DataLayer
         {
             return _context.TblFoodOrder.Where(fo => fo.TblCustomerId == customerId);
         }
+
     }
 }

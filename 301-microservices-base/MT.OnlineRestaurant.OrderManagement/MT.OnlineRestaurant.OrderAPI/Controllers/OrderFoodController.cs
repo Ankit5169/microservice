@@ -26,15 +26,46 @@ namespace MT.OnlineRestaurant.OrderAPI.Controllers
     {
         private readonly IPlaceOrderActions _placeOrderActions;
         private readonly ILogService _logService;
+        private readonly IAddToCartActions _addToCartActions;
+
         /// <summary>
         /// Inject buisiness layer dependency
         /// </summary>
         /// <param name="placeOrderActions">Instance of this interface is injected in startup</param>
-        public OrderFoodController(IPlaceOrderActions placeOrderActions, ILogService logService)
+        /// <param name="logService"></param>
+        /// <param name="addToCartActions"></param>
+        public OrderFoodController(IPlaceOrderActions placeOrderActions, ILogService logService, IAddToCartActions addToCartActions)
         {
             _placeOrderActions = placeOrderActions;
             _logService = logService;
-        }       
+            _addToCartActions = addToCartActions;
+        }
+        [HttpPost]
+        [Route("api/AddToCart")]
+        public async Task<IActionResult> AddToCart([FromBody]AddToCartEntity addToCartEntity)
+        {
+            _logService.LogMessage("AddToCart Entity received at endpoint : api/AddToCart, User ID : " + addToCartEntity.CustomerId);
+            int UserId = (Request.Headers.ContainsKey("CustomerId") ? int.Parse(HttpContext.Request.Headers["CustomerId"]) : 0);
+
+            string UserToken = (Request.Headers.ContainsKey("AuthToken") ? Convert.ToString(HttpContext.Request.Headers["AuthToken"]) : "");
+
+            AddToCartEntityValidator orderEntityValidator = new AddToCartEntityValidator(UserId, UserToken, _addToCartActions);
+            ValidationResult validationResult = orderEntityValidator.Validate(addToCartEntity);
+
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.ToString("; "));
+            }
+            else
+            {
+                var result = await Task<int>.Run(() => _addToCartActions.AddToCart(addToCartEntity));
+                if (result <= 0)
+                {
+                    return BadRequest("Failed to add to cart, Please try again later.");
+                }
+            }
+            return Ok("Items Added to Cart successfully");
+        }
         /// <summary>
         /// POST api/OrderFood
         /// To order food
@@ -58,7 +89,7 @@ namespace MT.OnlineRestaurant.OrderAPI.Controllers
             else
             {
                 var result = await Task<int>.Run(() => _placeOrderActions.PlaceOrder(orderEntity));
-                if (result == 0)
+                if (result <= 0)
                 {
                     return BadRequest("Failed to place order, Please try again later");
                 }

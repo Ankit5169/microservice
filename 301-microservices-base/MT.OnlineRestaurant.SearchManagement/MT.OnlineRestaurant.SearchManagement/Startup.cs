@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MessagesManagement;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -72,9 +73,10 @@ namespace MT.OnlineRestaurant.SearchManagement
                         options.Filters.Add(new ErrorHandlingFilter(Configuration.GetConnectionString("DatabaseConnectionString")));
 
                     });
-
+            //services.AddSingleton<ReceiveMessage>();
             services.AddTransient<IRestaurantBusiness, RestaurantBusiness>();
             services.AddTransient<ISearchRepository, SearchRepository>();
+            services.AddTransient<IMessageReceiver, ReceiveMessage>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -90,6 +92,9 @@ namespace MT.OnlineRestaurant.SearchManagement
                 c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "SearchManager (V 1.0)");
             });
             app.UseMvc();
+            
+            var busSubscription = app.ApplicationServices.GetService<IMessageReceiver>();
+            busSubscription.RegisterOnMessageHandlerAndReceiveMessages();
             //message.RegisterOnMessageHandlerAndReceiveMessages();
         }
     }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using LoggingManagement;
+using MessagesManagement;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -56,8 +57,11 @@ namespace MT.OnlineRestaurant.OrderAPI
         /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddTransient<IMessageSender, SendMessage>();
             services.AddTransient<IPlaceOrderActions, PlaceOrderActions>();
             services.AddTransient<IPlaceOrderDbAccess, PlaceOrderDbAccess>();
+            services.AddTransient<IAddToCartActions, AddToCartActions>();
+            services.AddTransient<IAddToCartDbAccess, AddToCartDbAccess>();
             services.AddTransient<IPaymentActions, PaymentActions>();
             services.AddTransient<IPaymentDbAccess, PaymentDbAccess>();
             services.AddTransient<IBookYourTableBusiness, BookYourTableBusiness>();
@@ -87,7 +91,7 @@ namespace MT.OnlineRestaurant.OrderAPI
             services.AddMvc()
                     .AddMvcOptions(options =>
                     {
-                        options.Filters.Add(new Authorization());
+                        //options.Filters.Add(new Authorization());
                         options.Filters.Add(new LoggingFilter(Configuration.GetConnectionString("DatabaseConnectionString")));
                         options.Filters.Add(new ErrorHandlingFilter(Configuration.GetConnectionString("DatabaseConnectionString")));
                     });

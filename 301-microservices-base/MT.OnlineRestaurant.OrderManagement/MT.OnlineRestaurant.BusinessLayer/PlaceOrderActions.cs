@@ -24,7 +24,7 @@ namespace MT.OnlineRestaurant.BusinessLayer
 
         public PlaceOrderActions()
         {
-            
+
         }
 
         public PlaceOrderActions(IPlaceOrderDbAccess placeOrderDbAccess)
@@ -46,25 +46,45 @@ namespace MT.OnlineRestaurant.BusinessLayer
         /// <returns>order id</returns>
         public int PlaceOrder(OrderEntity orderEntity)
         {
-            DataLayer.Context.TblFoodOrder tblFoodOrder = _mapper.Map<DataLayer.Context.TblFoodOrder>(orderEntity);
-
-            IList<DataLayer.Context.TblFoodOrderMapping> tblFoodOrderMappings = new List<DataLayer.Context.TblFoodOrderMapping>();
-    
-            foreach (OrderMenus orderMenu in orderEntity.OrderMenuDetails)
+            try
             {
-                tblFoodOrderMappings.Add(new DataLayer.Context.TblFoodOrderMapping()
-                {
-                    TblFoodOrderId = 0,
-                    TblMenuId = orderMenu.MenuId,
-                    Price = orderMenu.Price,
-                    UserCreated = 0,
-                    RecordTimeStampCreated = DateTime.Now
-                });
-            }
+                DataLayer.Context.TblFoodOrder tblFoodOrder = _mapper.Map<DataLayer.Context.TblFoodOrder>(orderEntity);
+                tblFoodOrder.UserCreated = orderEntity.CustomerId;
+                //calculate total price
+                tblFoodOrder.TotalPrice = TotalPrice(orderEntity);
+                var OrderID = _placeOrderDbAccess.PlaceOrder(tblFoodOrder);
 
-            return _placeOrderDbAccess.PlaceOrder(tblFoodOrder);            
+                List<DataLayer.Context.TblFoodOrderMapping> tblFoodOrderMappings = new List<DataLayer.Context.TblFoodOrderMapping>();
+
+                foreach (OrderMenus orderMenu in orderEntity.OrderMenuDetails)
+                {
+                    tblFoodOrderMappings.Add(new DataLayer.Context.TblFoodOrderMapping()
+                    {
+                        TblFoodOrderId = OrderID,
+                        TblMenuId = orderMenu.MenuId,
+                        Price = orderMenu.Price,
+                        UserCreated = orderEntity.CustomerId,
+                        RecordTimeStampCreated = DateTime.Now
+                    });
+                }
+
+                return _placeOrderDbAccess.PlaceOrderMappingTable(tblFoodOrderMappings);
+            }
+            catch (Exception ex)
+            {
+                return -1;
+            }
         }
 
+        private decimal TotalPrice(OrderEntity orderEntity)
+        {
+            decimal sum = 0;
+            foreach (OrderMenus orderMenu in orderEntity.OrderMenuDetails)
+            {
+                sum += orderMenu.Price;
+            }
+            return sum;
+        }
         /// <summary>
         /// Cancel Order
         /// </summary>
@@ -107,7 +127,7 @@ namespace MT.OnlineRestaurant.BusinessLayer
                 {
                     string json = await httpResponseMessage.Content.ReadAsStringAsync();
                     RestaurantInformation restaurantInformation = JsonConvert.DeserializeObject<RestaurantInformation>(json);
-                    if(restaurantInformation != null)
+                    if (restaurantInformation != null)
                     {
                         return true;
                     }
@@ -118,7 +138,7 @@ namespace MT.OnlineRestaurant.BusinessLayer
         public async Task<bool> IsOrderItemInStock(OrderEntity orderEntity, int UserId, string UserToken)
         {
             //using (HttpClient httpClient = WebAPIClient.GetClient(UserToken, UserId, _connectionStrings.Value.RestaurantApiUrl))
-            using(HttpClient httpClient = new HttpClient())
+            using (HttpClient httpClient = new HttpClient())
             {
                 HttpResponseMessage httpResponseMessage = await httpClient.GetAsync("http://localhost:10601/api/OrderDetail?RestaurantID=" + orderEntity.RestaurantId);
                 if (httpResponseMessage.IsSuccessStatusCode)

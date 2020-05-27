@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MT.Online.Restaurant.MessagesManagement.Services
+namespace MessagesManagement
 {
-    public interface IMessages
+    public interface IMessageReceiver
     {
         void RegisterOnMessageHandlerAndReceiveMessages();
-        Task SendMessagesAsync<T>(T senderObj);
+
     }
+
 }

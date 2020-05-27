@@ -5,21 +5,27 @@ using MT.OnlineRestaurant.DataLayer.interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
-
+using MessagesManagement;
 namespace MT.OnlineRestaurant.BusinessLayer
 {
     public class PaymentActions : IPaymentActions
     {
         private readonly IPaymentDbAccess _paymentDbAccess;
 
-        public PaymentActions(IPaymentDbAccess paymentDbAccess)
+        private readonly IMessageSender _busSender;
+        public PaymentActions(IPaymentDbAccess paymentDbAccess, IMessageSender busSender )
         {
             _paymentDbAccess = paymentDbAccess;
+            _busSender = busSender;
         }
 
         public int MakePaymentForOrder(PaymentEntity orderPaymentDetails)
         {
-            return _paymentDbAccess.MakePaymentForOrder(new DataLayer.Context.TblOrderPayment()
+            //1.check  stock
+
+            //2.place order
+            var status =
+            _paymentDbAccess.MakePaymentForOrder(new DataLayer.Context.TblOrderPayment()
             {
                 TblFoodOrderId = orderPaymentDetails.OrderId,
                 TblPaymentTypeId = orderPaymentDetails.PaymentTypeId,
@@ -28,6 +34,16 @@ namespace MT.OnlineRestaurant.BusinessLayer
                 TblPaymentStatusId = (int)Status.Initiated,
                 RecordTimeStampCreated = DateTime.Now
             });
+
+            //3.update stock
+
+
+
+            //Make Azure Call
+            _busSender.SendMessagesAsync(orderPaymentDetails.OrderId.ToString(), "ap-test-topic");
+            //MessagesManagement.SendMessage.SendMessagesAsync(orderPaymentDetails.OrderId.ToString()).GetAwaiter().GetResult();
+
+            return 0;
         }
 
         public int UpdatePaymentAndOrderStatus(UpdatePaymentEntity orderPaymentDetails)

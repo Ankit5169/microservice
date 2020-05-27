@@ -12,7 +12,7 @@
     <ProjectReference Include="..\..\MT.OnlineRestaurant.SearchManagement\MT.OnlineRestaurant.BusinessEntities\MT.OnlineRestaurant.BusinessEntities.csproj" />
     <ProjectReference Include="..\..\MT.OnlineRestaurant.SearchManagement\MT.OnlineRestaurant.BusinessLayer\MT.OnlineRestaurant.BusinessLayer.csproj" />
     <ProjectReference Include="..\..\MT.OnlineRestaurant.SearchManagement\MT.OnlineRestaurant.DataLayer\MT.OnlineRestaurant.DataLayer.csproj" />
-    <ProjectReference Include="..\LoggingManagement\LoggingManagement.csproj" />
+    <!--<ProjectReference Include="..\LoggingManagement\LoggingManagement.csproj" />-->
     <ProjectReference Include="..\MT.OnlineRestaurant.BusinessEntities\MT.OnlineRestaurant.BusinessEntities.csproj" />
   </ItemGroup>
 

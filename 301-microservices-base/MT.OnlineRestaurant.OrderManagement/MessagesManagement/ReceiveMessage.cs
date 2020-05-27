@@ -1,18 +1,30 @@
 ﻿using Microsoft.Azure.ServiceBus;
+using MT.OnlineRestaurant.BusinessEntities;
+using MT.OnlineRestaurant.BusinessLayer;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace MessagesManagement
 {
-    public class ReceiveMessage
+    public class ReceiveMessage: IMessageReceiver
     {
-        const string ServiceBusConnectionString = "Endpoint=sb://capstoneapi.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=CLJQF4McnQ8UVBixOM+pTvK/Uo9ybJGESjQQMGnWscA=";
-        const string TopicName = "itemoutofstock";
-        const string SubscriptionName = "s1";
+        const string ServiceBusConnectionString = "Endpoint=sb://ap-service-bus.servicebus.windows.net/;SharedAccessKeyName=ap-test-listen;SharedAccessKey=mJMLV/jBd5FFSmGPiZB3yCGiA1fzx4SJ4U4SElA0YF4=";
+        const string TopicName = "ap-test-topic";
+        const string SubscriptionName = "ap-sub-send";
+        private readonly IRestaurantBusiness _restaurantBusiness;
         static ISubscriptionClient subscriptionClient;
+
+        //public ReceiveMessage(IRestaurantBusiness restaurantBusiness)
+        //{
+        //    //_restaurantBusiness = restaurantBusiness;
+        //    //subscriptionClient = new SubscriptionClient(ServiceBusConnectionString, TopicName, SubscriptionName);
+        //}
+
         public void RegisterOnMessageHandlerAndReceiveMessages()
         {
             subscriptionClient = new SubscriptionClient(ServiceBusConnectionString, TopicName, SubscriptionName);
@@ -31,9 +43,12 @@ namespace MessagesManagement
             // Register the function that processes messages.
             subscriptionClient.RegisterMessageHandler(ProcessMessagesAsync, messageHandlerOptions);
         }
-        static async Task ProcessMessagesAsync(Message message, CancellationToken token)
+        private async Task ProcessMessagesAsync(Message message, CancellationToken token)
         {
-            //StockItems order = (StockItems)JsonConvert.DeserializeObject<object>(Encoding.UTF8.GetString(message.Body));
+            var id = JsonConvert.DeserializeObject<object>(Encoding.UTF8.GetString(message.Body));
+
+            var result = _restaurantBusiness.ItemInStock(1,2);
+
             await subscriptionClient.CompleteAsync(message.SystemProperties.LockToken);
             // Note: Use the cancellationToken passed as necessary to determine if the subscriptionClient has already been closed.
             // If subscriptionClient has already been closed, you can choose to not call CompleteAsync() or AbandonAsync() etc.

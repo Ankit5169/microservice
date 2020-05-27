@@ -33,6 +33,9 @@ namespace MT.OnlineRestaurant.DataLayer.Context
         public virtual DbSet<TblTableOrder> TblTableOrder { get; set; }
         public virtual DbSet<TblTableOrderMapping> TblTableOrderMapping { get; set; }
 
+        public virtual DbSet<TblFoodCart> TblFoodCart { get; set; }
+        public virtual DbSet<TblFoodCartMapping> TblFoodCartMapping { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -140,6 +143,58 @@ namespace MT.OnlineRestaurant.DataLayer.Context
                     .HasForeignKey(d => d.TblFoodOrderId)
                     .HasConstraintName("FK_tblFoodOrderMapping_tblFoodOrderID");
             });
+
+            modelBuilder.Entity<TblFoodCart>(entity =>
+            {
+                entity.ToTable("tblFoodCart");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.RecordTimeStamp)
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("((0))");
+
+                entity.Property(e => e.RecordTimeStampCreated)
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("((0))");
+
+                entity.Property(e => e.TblCustomerId)
+                    .HasColumnName("tblCustomerID")
+                    .HasDefaultValueSql("((0))");
+
+                entity.Property(e => e.TblRestaurantId)
+                    .HasColumnName("tblRestaurantID")
+                    .HasDefaultValueSql("((0))");
+
+                entity.Property(e => e.TotalPrice).HasColumnType("decimal(18, 2)");
+            });
+
+            modelBuilder.Entity<TblFoodCartMapping>(entity =>
+            {
+                entity.ToTable("tblFoodCartMapping");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.Price).HasColumnType("decimal(18, 2)");
+
+                entity.Property(e => e.RecordTimeStamp)
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("((0))");
+
+                entity.Property(e => e.RecordTimeStampCreated)
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("((0))");
+
+                entity.Property(e => e.TblMenuId)
+                    .HasColumnName("tblMenuID")
+                    .HasDefaultValueSql("((0))");
+
+                entity.HasOne(d => d.TblFoodCart)
+                    .WithMany(p => p.TblFoodCartMapping)
+                    .HasForeignKey(d => d.TblFoodCartId)
+                    .HasConstraintName("FK_tblFoodCartMapping_tblFoodCartID");
+            });
+
 
             modelBuilder.Entity<TblOrderPayment>(entity =>
             {

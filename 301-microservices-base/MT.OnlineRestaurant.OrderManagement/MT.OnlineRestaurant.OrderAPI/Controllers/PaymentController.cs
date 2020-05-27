@@ -31,7 +31,7 @@ namespace MT.OnlineRestaurant.OrderAPI.Controllers
         /// <returns>Payment status</returns>
         [HttpPost]
         [Route("api/MakePayment")]
-        public IActionResult MakePayment(PaymentEntity paymentEntity)
+        public IActionResult MakePayment([FromBody] PaymentEntity paymentEntity)
         {
             PaymentEntityValidator paymentEntityValidator = new PaymentEntityValidator();
             ValidationResult validationResult = paymentEntityValidator.Validate(paymentEntity);
